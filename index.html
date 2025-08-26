@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dikshit Banking Software</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg:#dff6f0;          /* light greenish background */
+      --card:#ffffff;        /* white card */
+      --muted:#64748b;       /* gray for hints */
+      --text:#1e293b;        /* dark text */
+      --accent:#22c55e;      /* green */
+      --accent-2:#2563eb;    /* blue */
+      --warn:#ef4444;        /* red */
+      --shadow:0 8px 20px rgba(0,0,0,.1);
+      --radius:14px;
+    }
+
+    body {
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #dff6f0);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .container {
+      width:100%;
+      max-width:800px;
+      background: var(--card);
+      padding:20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      text-align:center;
+      color: var(--accent-2);
+    }
+
+    h2 {
+      color: var(--accent);
+    }
+
+    input {
+      width:100%;
+      padding:10px;
+      margin:6px 0;
+      border:1px solid #ccc;
+      border-radius: var(--radius);
+    }
+
+    button {
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border:none;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    button:hover {
+      opacity:0.9;
+    }
+
+    .hidden {
+      display:none;
+    }
+
+    .output {
+      margin-top:12px;
+      padding:10px;
+      background:#f1f5f9;
+      border-radius: var(--radius);
+      min-height:30px;
+    }
+
+    .section {
+      margin-top:20px;
+      padding:15px;
+      border:1px solid #e2e8f0;
+      border-radius: var(--radius);
+    }
+
+    .history {
+      margin-top:10px;
+      font-size:14px;
+      color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Dikshit Banking Software</h1>
+
+    <!-- Login Section -->
+    <div id="loginSection">
+      <h2>Login</h2>
+      <input type="text" id="name" placeholder="Enter your name">
+      <input type="password" id="pin" maxlength="4" placeholder="Enter 4-digit PIN">
+      <button onclick="login()">Login</button>
+      <div class="output" id="loginMsg"></div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard" class="hidden">
+      <h2>Welcome, <span id="userName"></span> 👋</h2>
+      <p><b>Balance:</b> <span id="balance"></span></p>
+
+      <div class="section">
+        <h3>1. Check Balance</h3>
+        <button onclick="checkBalance()">Check</button>
+      </div>
+
+      <div class="section">
+        <h3>2. Mobile Top-up</h3>
+        <input type="text" id="topPhone" placeholder="Enter 10-digit phone">
+        <input type="number" id="topAmount" placeholder="Enter amount">
+        <button onclick="topup()">Top-up</button>
+      </div>
+
+      <div class="section">
+        <h3>3. Balance Transfer</h3>
+        <input type="text" id="trAccount" placeholder="Enter 10-digit account">
+        <input type="number" id="trAmount" placeholder="Enter amount">
+        <button onclick="transfer()">Transfer</button>
+      </div>
+
+      <div class="section">
+        <h3>4. Logout</h3>
+        <button onclick="logout()">Exit</button>
+      </div>
+
+      <div class="section">
+        <h3>Recent Activity</h3>
+        <div class="history" id="history">No transactions yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== State (Bank Data) ======
+    let balance = 1000000; // starting balance
+    let userName = "";
+    let history = [];
+
+    // ====== Helper Functions ======
+    function formatMoney(amount) {
+      return "Rs. " + amount.toLocaleString();
+    }
+
+    function addHistory(action, detail) {
+      const time = new Date().toLocaleString();
+      history.push(`${time} - ${action}: ${detail}`);
+      document.getElementById("history").innerHTML = history.slice(-5).join("<br>");
+    }
+
+    // ====== Login ======
+    function login() {
+      const name = document.getElementById("name").value;
+      const pin = document.getElementById("pin").value;
+      const msg = document.getElementById("loginMsg");
+
+      if(name === "" || pin === "") {
+        msg.innerText = "Please enter both name and PIN.";
+        return;
+      }
+
+      if(pin.length !== 4 || isNaN(pin)) {
+        msg.innerText = "PIN must be a 4-digit number.";
+        return;
+      }
+
+      userName = name;
+      document.getElementById("userName").innerText = userName;
+      document.getElementById("balance").innerText = formatMoney(balance);
+
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("dashboard").classList.remove("hidden");
+    }
+
+    // ====== Check Balance ======
+    function checkBalance() {
+      alert("Your balance is " + formatMoney(balance));
+      addHistory("Checked Balance", formatMoney(balance));
+    }
+
+    // ====== Top-up ======
+    function topup() {
+      const phone = document.getElementById("topPhone").value;
+      const amt = parseInt(document.getElementById("topAmount").value);
+
+      if(phone.length !== 10 || isNaN(phone)) {
+        alert("Invalid phone number! Must be 10 digits.");
+        return;
+      }
+      if(isNaN(amt) || amt <= 0) {
+        alert("Enter a valid top-up amount.");
+        return;
+      }
+      if(amt > balance - 500) {
+        alert("Insufficient balance! You must leave at least Rs. 500.");
+        return;
+      }
+
+      balance -= amt;
+      document.getElementById("balance").innerText = formatMoney(balance);
+      alert("Top-up of " + formatMoney(amt) + " successful to " + phone);
+      addHistory("Top-up", phone + " (" + formatMoney(amt) + ")");
+    }
+
+    // ====== Transfer ======
+    function transfer() {
+      const acc = document.getElementById("trAccount").value;
+      const amt = parseInt(document.getElementById("trAmount").value);
+
+      if(acc.length !== 10 || isNaN(acc)) {
+        alert("Invalid account number! Must be 10 digits.");
+        return;
+      }
+      if(isNaN(amt) || amt <= 0) {
+        alert("Enter a valid transfer amount.");
+        return;
+      }
+      if(amt > balance) {
+        alert("Insufficient balance!");
+        return;
+      }
+
+      balance -= amt;
+      document.getElementById("balance").innerText = formatMoney(balance);
+      alert("Transfer of " + formatMoney(amt) + " successful to account " + acc);
+      addHistory("Transfer", acc + " (" + formatMoney(amt) + ")");
+    }
+
+    // ====== Logout ======
+    function logout() {
+      alert("Thank you for using Dikshit Banking Software!");
+      location.reload(); // reload page to reset
+    }
+  </script>
+</body>
+</html>
